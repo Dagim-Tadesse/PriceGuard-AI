@@ -1,0 +1,46 @@
+[
+  {
+    "product": "Cooking Oil (5L)",
+    "location": "Bole Supermarket",
+    "prices": [
+      { "date": "2024-04-01", "price": 950 },
+      { "date": "2024-04-02", "price": 965 },
+      { "date": "2024-04-03", "price": 980 },
+      { "date": "2024-04-04", "price": 1010 },
+      { "date": "2024-04-05", "price": 1050 }
+    ]
+  },
+  {
+    "product": "Cooking Oil (5L)",
+    "location": "Merkato Open Market",
+    "prices": [
+      { "date": "2024-04-01", "price": 880 },
+      { "date": "2024-04-02", "price": 890 },
+      { "date": "2024-04-03", "price": 910 },
+      { "date": "2024-04-04", "price": 930 },
+      { "date": "2024-04-05", "price": 960 }
+    ]
+  },
+  {
+    "product": "Tomatoes (1kg)",
+    "location": "Merkato Open Market",
+    "prices": [
+      { "date": "2024-04-01", "price": 60 },
+      { "date": "2024-04-02", "price": 55 },
+      { "date": "2024-04-03", "price": 48 },
+      { "date": "2024-04-04", "price": 45 },
+      { "date": "2024-04-05", "price": 40 }
+    ]
+  },
+  {
+    "product": "Bread (Loaf)",
+    "location": "Bole Supermarket",
+    "prices": [
+      { "date": "2024-04-01", "price": 35 },
+      { "date": "2024-04-02", "price": 35 },
+      { "date": "2024-04-03", "price": 35 },
+      { "date": "2024-04-04", "price": 36 },
+      { "date": "2024-04-05", "price": 36 }
+    ]
+  }
+]
