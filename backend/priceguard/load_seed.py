@@ -16,7 +16,7 @@ with open(file_path) as f:
     data = json.load(f)
 
 for item in data:
-    product = item["product"].lower()
+    product = item["product"]  # preserve original casing
     location = item["location"]
 
     for entry in item["prices"]:
