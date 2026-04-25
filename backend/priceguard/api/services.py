@@ -1,5 +1,5 @@
 import logging
-from ai.predictor import predict_price
+from Ai.model import predict_price
 from .models import Price
 
 logger = logging.getLogger(__name__)
