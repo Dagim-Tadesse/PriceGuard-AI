@@ -9,17 +9,16 @@
 ## Flow
 
 1. Add 3 prices for the same product (different days are fine).
-   - `POST /api/prices/` with `{ product_name, location, price }`
-2. Fetch the product list.
-   - `GET /api/products/`
-   - Show: latest price + trend + action
+   - `POST /api/prices/add/` with `{ product, location, price }`
+2. Fetch the product list (latest price + trend/action).
+   - `GET /api/prices/`
 3. Open the product history.
-   - `GET /api/products/{id}/history/`
+   - `GET /api/prices/<product>/` (URL-encode spaces/special characters)
 4. Show the prediction output.
-   - `GET /api/products/{id}/prediction/`
+   - `GET /api/prediction/<product>/`
 
 ## Expected
 
 - Trend becomes `increasing|decreasing|stable`.
 - Action becomes `buy_now|wait`.
-- Response envelope is consistent for all endpoints.
+- Responses are plain JSON (see `docs/api.md`).

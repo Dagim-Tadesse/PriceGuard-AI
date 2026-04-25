@@ -1,118 +1,86 @@
-\# API Contract (v1)
+# API Contract (current implementation)
 
-Base path: \`/api\`
+Base path: `/api`
 
-\## Response envelope (success)
+Note: Responses are plain JSON (no `{ ok, data }` envelope).
 
-\```json
-{\
- "ok": true,\
- "data": {\/_ endpoint-specific _\/}\
-}
-\```
+## Endpoints
 
-\## Response envelope (error)
+### 1) Add price
 
-\```json
-{\
- "ok": false,\
- "error": {\
- "code": "VALIDATION_ERROR",\
- "message": "Human readable message",\
- "details": {\/_ optional _/\}\
- }\
-}
-\```
-
-\## Endpoints
-
-\### 1) Add price
-
-\`POST /api/prices/\`
+`POST /api/prices/add/`
 
 Request:
 
-\```json
-{\
- "product_name": "Coca Cola 50cl",\
- "location": "Accra",\
- "price": 12.50\
+```json
+{
+  "product": "Cooking Oil (5L)",
+  "price": 1050,
+  "location": "Bole Supermarket"
 }
-\```
+```
+
+Response (saved record):
+
+```json
+{
+  "id": 123,
+  "product": "Cooking Oil (5L)",
+  "price": 1050.0,
+  "location": "Bole Supermarket",
+  "date": "2024-04-05T00:00:00Z"
+}
+```
+
+### 2) List latest prices (with AI trend/action)
+
+`GET /api/prices/`
 
 Response:
 
-\```json
-{\
- "ok": true,\
- "data": {\
- "product": {"id": 1, "name": "Coca Cola 50cl", "location": "Accra"},\
- "price_entry": {"id": 10, "price": 12.5, "recorded_at": "2026-04-15T12:00:00Z"}\
- }\
-}
-\```
+```json
+[
+  {
+    "product": "Cooking Oil (5L)",
+    "price": 1050.0,
+    "location": "Bole Supermarket",
+    "trend": "increasing",
+    "action": "buy_now"
+  }
+]
+```
 
-\### 2) List products (with latest price + decision)
+### 3) Product price history
 
-\`GET /api/products/\`
-
-Response:
-
-\```json
-{\
- "ok": true,\
- "data": {\
- "items": [\
- {\
- "id": 1,\
- "name": "Coca Cola 50cl",\
- "location": "Accra",\
- "latest_price": 12.5,\
- "latest_recorded_at": "2026-04-15T12:00:00Z",\
- "trend": "increasing",\
- "action": "wait"\
- }\
- ]\
- }\
-}
-\```
-
-\### 3) Product price history
-
-\`GET /api/products/{product_id}/history/\`
+`GET /api/prices/<product>/`
 
 Response:
 
-\```json
-{\
- "ok": true,\
- "data": {\
- "product": {"id": 1, "name": "Coca Cola 50cl", "location": "Accra"},\
- "history": [\
- {"id": 8, "price": 11.0, "recorded_at": "2026-04-13T12:00:00Z"},\
- {"id": 9, "price": 11.5, "recorded_at": "2026-04-14T12:00:00Z"},\
- {"id": 10, "price": 12.5, "recorded_at": "2026-04-15T12:00:00Z"}\
- ]\
- }\
-}
-\```
+```json
+[
+  {
+    "id": 1,
+    "product": "Cooking Oil (5L)",
+    "price": 950.0,
+    "location": "Bole Supermarket",
+    "date": "2024-04-01T00:00:00Z"
+  }
+]
+```
 
-\### 4) Product prediction
+### 4) Product prediction
 
-\`GET /api/products/{product_id}/prediction/\`
+`GET /api/prediction/<product>/`
 
 Response:
 
-\```json
-{\
- "ok": true,\
- "data": {\
- "product": {"id": 1, "name": "Coca Cola 50cl", "location": "Accra"},\
- "trend": "increasing",\
- "predicted_price": 13.0,\
- "action": "wait",\
- "confidence": 0.62,\
- "reason": "Last 3 prices increased."\
- }\
+```json
+{
+  "trend": "increasing",
+  "predicted_price": 1100.0,
+  "action": "buy_now",
+  "confidence": 0.85,
+  "reason": "Price increased over the last 3 days",
+  "current_price": 1050.0
 }
-\```
+```
