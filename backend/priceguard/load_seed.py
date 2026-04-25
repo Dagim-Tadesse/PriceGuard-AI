@@ -1,3 +1,4 @@
+from api.models import Price
 import json
 import os
 import sys
@@ -10,8 +11,6 @@ if CURRENT_DIR not in sys.path:
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "priceguard.settings")
 django.setup()
-
-from api.models import Price
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
