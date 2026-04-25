@@ -20,10 +20,14 @@ with st.form("add_form"):
         try:
             res = add_price(payload)
 
-            if res.status_code == 200:
+            if res.ok:
                 st.success("Added successfully")
             else:
                 st.error("Failed")
+                try:
+                    st.json(res.json())
+                except Exception:
+                    st.code(res.text)
 
-        except:
+        except Exception:
             st.error("Backend not reachable")
