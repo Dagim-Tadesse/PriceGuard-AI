@@ -4,6 +4,7 @@ import os
 import sys
 import django
 from datetime import datetime
+from django.utils import timezone
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 if CURRENT_DIR not in sys.path:
@@ -34,7 +35,10 @@ for item in data:
             product=product,
             price=entry["price"],
             location=location,
-            date=datetime.strptime(entry["date"], "%Y-%m-%d")
+            date=timezone.make_aware(
+                datetime.strptime(entry["date"], "%Y-%m-%d"),
+                timezone.get_current_timezone(),
+            )
         )
 
 print("Seed data loaded successfully")

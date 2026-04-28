@@ -1,5 +1,5 @@
 import streamlit as st
-from api import add_price
+from api import ApiError, add_price
 st.set_page_config(layout="wide")
 st.title("➕ Add Price")
 
@@ -18,16 +18,11 @@ with st.form("add_form"):
         }
 
         try:
-            res = add_price(payload)
+            add_price(payload)
+            st.success("Added successfully")
+            st.rerun()
 
-            if res.ok:
-                st.success("Added successfully")
-            else:
-                st.error("Failed")
-                try:
-                    st.json(res.json())
-                except Exception:
-                    st.code(res.text)
-
+        except ApiError as exc:
+            st.error(str(exc))
         except Exception:
             st.error("Backend not reachable")

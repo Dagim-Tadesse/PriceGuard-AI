@@ -10,19 +10,23 @@ def add_price(request):
     serializer = PriceSerializer(data=request.data)
     if serializer.is_valid():
         serializer.save()
-        return Response(serializer.data)
-    return Response(serializer.errors, status=400)
+        return Response(serializer.data, status=201)
+    return Response({
+        "error": "Invalid price data",
+        "details": serializer.errors,
+    }, status=400)
 
 
 @api_view(['GET'])
 def get_prices(request):
     products = get_all_products()
     if not products:
-        return Response({"error": "No data found"}, status=404)
+        return Response([])
 
     data = []
     for product in products:
-        latest = Price.objects.filter(product=product).order_by('-date').first()
+        latest = Price.objects.filter(
+            product=product).order_by('-date').first()
         if not latest:
             continue
         prediction = get_prediction(product)
@@ -40,8 +44,6 @@ def get_prices(request):
 @api_view(['GET'])
 def get_price_history(request, product):
     prices = get_product_history(product)
-    if not prices.exists():
-        return Response({"error": "No data found"}, status=404)
     serializer = PriceSerializer(prices, many=True)
     return Response(serializer.data)
 

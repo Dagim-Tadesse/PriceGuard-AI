@@ -1,0 +1,4 @@
+Django>=6.0,<7
+djangorestframework>=3.17,<4
+streamlit>=1.30,<2
+requests>=2.31,<3
