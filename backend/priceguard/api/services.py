@@ -14,7 +14,7 @@ def get_all_products():
 
 
 def get_prediction(product):
-    logger.debug(f"[AI] product received: {product!r}")
+    logger.info("[AI] prediction requested for %r", product)
 
     data = Price.objects.filter(product__iexact=product).order_by('date')
     count = data.count()
@@ -43,6 +43,8 @@ def get_prediction(product):
         }
 
     result = predict_price(formatted)
+    logger.info("[AI] prediction completed for %r: %s",
+                product, result.get("action"))
     logger.debug(f"[AI] result: {result}")
 
     return result
