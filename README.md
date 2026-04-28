@@ -38,8 +38,13 @@ Implement the endpoints in \`docs/api.md\` and make the demo flow in \`docs/demo
 3. Start the frontend:
 
 ```powershell
-.\.venv\Scripts\python.exe -m streamlit run Frontend\app.py
+cd Frontend
+npm run dev
 ```
+
+Frontend app URL (default): `http://127.0.0.1:5173`
+
+Note: The old Streamlit UI is archived in `Frontend_streamlit_legacy/` and is no longer the primary frontend.
 
 ## Reset demo data
 
@@ -98,6 +103,10 @@ This is optimized for interpretability and demo reliability rather than heavy mo
 - Backend not reachable from frontend
   - Ensure Django is running on port `8000`.
   - Run: `\.venv\Scripts\python.exe backend\priceguard\manage.py runserver 8000`
+
+- Frontend command not found
+  - Ensure Node.js is installed.
+  - From `Frontend/`, run `npm install` once, then `npm run dev`.
 
 - CORS or `DisallowedHost` errors
   - Review `docs/cors.md` and add required origins/hosts.

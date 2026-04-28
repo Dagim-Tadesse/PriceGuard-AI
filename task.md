@@ -69,11 +69,9 @@ Verified:
 - [x] Add a small smoke test script that checks list, history, prediction, and add-price flows.
 - [x] Add request logging or debug logging for AI predictions.
 - [x] Add graceful handling for missing product history.
-- [ ] Add CORS/config notes if frontend and backend are run separately.
+- [x] Add CORS/config notes if frontend and backend are run separately.
 - [x] Keep the seed data idempotent so running it twice does not duplicate records.
 - [x] Remove tracked build artifacts from git and keep caches ignored.
-
-- [x] Add CORS/config notes if frontend and backend are run separately.
 
 Verified:
 
@@ -115,10 +113,10 @@ Verified:
 
 Verified:
 
-- Streamlit dashboard now includes an accessibility mode toggle with higher contrast and larger typography.
-- Streamlit dashboard now includes buyer, seller, and admin role views with role-specific summary guidance.
+- TypeScript dashboard includes an accessibility mode toggle with higher contrast and larger typography.
+- TypeScript dashboard includes buyer, seller, and admin role views with role-specific summary guidance.
 - Comparison page now includes a region overview with inferred region grouping and average price chart.
-- Streamlit dashboard now requires a demo login before showing the main view.
+- TypeScript dashboard requires a demo login before showing the main view.
 
 ## Winning Demo Script
 
