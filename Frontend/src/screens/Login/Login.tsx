@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth } from "@/state/stores";
+import { auth, contrib } from "@/state/stores";
 import type { Role } from "@/types/api";
 import { Activity, ShieldCheck, ShoppingCart, Store, Crown } from "lucide-react";
 import { toast } from "sonner";
@@ -28,8 +28,10 @@ export default function Login() {
     }
     const acc = ACCOUNTS[selected];
     auth.signIn(acc.name, acc.role);
+    const awarded = contrib.awardDailyBonus();
     toast.success(`Welcome, ${acc.name}`);
-    navigate("/");
+    if (awarded) toast.success("Daily activity bonus +5 points");
+    navigate("/dashboard");
   };
 
   return (

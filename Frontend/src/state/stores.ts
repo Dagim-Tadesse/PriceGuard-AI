@@ -34,6 +34,9 @@ const STORAGE_A11Y = "pg.a11y";
 const STORAGE_THEME = "pg.theme";
 const STORAGE_LANG = "pg.lang";
 const STORAGE_CCY = "pg.ccy";
+const STORAGE_POINTS = "pg.points";
+const STORAGE_LEADERBOARD = "pg.leaderboard";
+const STORAGE_DAILY_BONUS = "pg.dailyBonus";
 
 interface AuthState { user: { name: string; role: Role } | null }
 const initialAuth: AuthState = (() => {
@@ -64,6 +67,89 @@ export const auth = {
   },
 };
 export const useAuth = () => useStore(authStore, (s) => s);
+
+interface Contributor {
+  name: string;
+  points: number;
+}
+
+const initialLeaderboard: { items: Contributor[] } = (() => {
+  if (typeof window === "undefined") {
+    return {
+      items: [
+        { name: "Market Scout", points: 120 },
+        { name: "Demo Driver", points: 95 },
+        { name: "Price Analyst", points: 82 },
+      ],
+    };
+  }
+  try {
+    const raw = localStorage.getItem(STORAGE_LEADERBOARD);
+    return raw ? { items: JSON.parse(raw) as Contributor[] } : {
+      items: [
+        { name: "Market Scout", points: 120 },
+        { name: "Demo Driver", points: 95 },
+        { name: "Price Analyst", points: 82 },
+      ],
+    };
+  } catch {
+    return {
+      items: [
+        { name: "Market Scout", points: 120 },
+        { name: "Demo Driver", points: 95 },
+        { name: "Price Analyst", points: 82 },
+      ],
+    };
+  }
+})();
+
+const leaderboardStore = createStore(initialLeaderboard);
+
+function persistLeaderboard(items: Contributor[]) {
+  localStorage.setItem(STORAGE_LEADERBOARD, JSON.stringify(items));
+}
+
+function bumpContributor(name: string, delta: number) {
+  const state = leaderboardStore.get();
+  const items = [...state.items];
+  const index = items.findIndex((item) => item.name === name);
+  if (index >= 0) {
+    items[index] = { ...items[index], points: items[index].points + delta };
+  } else {
+    items.push({ name, points: delta });
+  }
+  items.sort((a, b) => b.points - a.points);
+  persistLeaderboard(items);
+  leaderboardStore.set({ items });
+}
+
+function getCurrentUserName() {
+  return authStore.get().user?.name ?? "Guest";
+}
+
+export const contrib = {
+  award: (delta: number, label?: string) => {
+    const user = getCurrentUserName();
+    const current = Number(localStorage.getItem(STORAGE_POINTS) ?? "0");
+    const next = current + delta;
+    localStorage.setItem(STORAGE_POINTS, String(next));
+    bumpContributor(user, delta);
+    return next;
+  },
+  awardDailyBonus: () => {
+    if (typeof window === "undefined") return false;
+    const today = new Date().toISOString().slice(0, 10);
+    const lastAward = localStorage.getItem(STORAGE_DAILY_BONUS);
+    if (lastAward === today) return false;
+    localStorage.setItem(STORAGE_DAILY_BONUS, today);
+    contrib.award(5);
+    return true;
+  },
+  points: () => Number(localStorage.getItem(STORAGE_POINTS) ?? "0"),
+  leaderboard: () => leaderboardStore.get().items,
+  usePoints: () => useStore(leaderboardStore, () => Number(localStorage.getItem(STORAGE_POINTS) ?? "0")),
+  useLeaderboard: () => useStore(leaderboardStore, (s) => s.items),
+};
 
 const initialWatch: { items: string[] } = (() => {
   if (typeof window === "undefined") return { items: [] };

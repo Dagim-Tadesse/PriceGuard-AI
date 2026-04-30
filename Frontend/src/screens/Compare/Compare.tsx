@@ -10,6 +10,7 @@ import { Scale, MapPin, Trophy, ArrowDownUp, Globe2 } from "lucide-react";
 import { fmtPrice } from "@/utils/format";
 import { regionFor } from "@/utils/region";
 import { useT } from "@/state/stores";
+import { categoryFor, confidenceLabel, lowDataWarning, sourceLabel, aggregationHint, externalFactorNote } from "@/utils/trust";
 
 export default function Compare() {
   const t = useT();
@@ -18,9 +19,11 @@ export default function Compare() {
     queryKey: ["history", product], queryFn: () => getHistory(product), enabled: !!product,
   });
 
-  const { latestByLoc, regionRows, cheapest, gap, locCount } = useMemo(() => {
+  const { latestByLoc, regionRows, cheapest, gap, locCount, category, confidenceText, source, dataWarning, aggregationText } = useMemo(() => {
     const result = { latestByLoc: [] as { location: string; price: number; date: string }[], regionRows: [] as any[], cheapest: null as any, gap: 0, locCount: 0 };
-    if (!history?.length) return result;
+    if (!history?.length) {
+      return { ...result, category: product ? categoryFor(product) : "Food", confidenceText: "Low", source: product ? sourceLabel(product) : "Simulated Demo Data", dataWarning: lowDataWarning(0), aggregationText: "No confirmed reports yet" };
+    }
     const map = new Map<string, { price: number; date: string }>();
     for (const r of history) {
       const cur = map.get(r.location);
@@ -48,6 +51,11 @@ export default function Compare() {
       cheapest: cheap,
       gap: prices.length ? Math.max(...prices) - Math.min(...prices) : 0,
       locCount: latest.length,
+      category: product ? categoryFor(product) : "Food",
+      confidenceText: confidenceLabel(Math.min(1, Math.max(0, 0.45 + latest.length * 0.12))),
+      source: product ? sourceLabel(product) : "Simulated Demo Data",
+      dataWarning: lowDataWarning(latest.length),
+      aggregationText: aggregationHint(history),
     };
   }, [history]);
 
@@ -68,6 +76,16 @@ export default function Compare() {
         <EmptyState icon={Scale} title="No data to compare yet" />
       ) : (
         <>
+          <div className="panel p-4 flex flex-wrap items-center justify-between gap-3 text-sm">
+            <div className="flex flex-wrap gap-2 text-[10px] font-mono uppercase tracking-[0.18em]">
+              <span className="px-2.5 py-1 rounded-full bg-secondary border border-border">{source}</span>
+              <span className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/25 text-primary">{category}</span>
+              <span className="px-2.5 py-1 rounded-full bg-secondary border border-border">{aggregationText}</span>
+              <span className="px-2.5 py-1 rounded-full bg-secondary border border-border">{confidenceText} confidence</span>
+            </div>
+            <p className="text-muted-foreground">{dataWarning}</p>
+          </div>
+
           <section className="grid grid-cols-2 md:grid-cols-3 gap-4">
             <MetricCard label="Locations Tracked" value={locCount} icon={MapPin} delay={0} />
             <MetricCard label="Cheapest Location" value={cheapest?.location ?? "—"} icon={Trophy} highlight hint={cheapest ? fmtPrice(cheapest.price) : ""} delay={100} />
@@ -117,6 +135,14 @@ export default function Compare() {
           <div className="panel p-6">
             <h2 className="font-display text-lg font-semibold mb-4">Region average comparison</h2>
             <LocationBars data={regionRows.map(r => ({ label: r.region.replace("Addis Ababa - ", "AA-"), value: r.avg }))} />
+          </div>
+
+          <div className="panel p-5 border-primary/20 bg-primary/5 text-sm leading-relaxed">
+            <div className="text-xs font-mono uppercase tracking-[0.18em] text-primary mb-2">Category mode</div>
+            <p>
+              {category} products are compared together here, so the view still stays useful when item-level data is thin.
+            </p>
+            <p className="mt-2 text-muted-foreground">{externalFactorNote()}</p>
           </div>
         </>
       )}

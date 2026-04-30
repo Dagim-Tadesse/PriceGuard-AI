@@ -6,7 +6,7 @@ import { z } from "zod";
 import { PlusCircle, Loader2 } from "lucide-react";
 import ErrorBanner from "@/components/feedback/ErrorBanner";
 import VoiceButton from "@/components/VoiceButton";
-import { useT, useLang } from "@/state/stores";
+import { useT, useLang, contrib } from "@/state/stores";
 
 const schema = z.object({
   product: z.string().trim().min(1, "Product is required").max(100),
@@ -34,7 +34,8 @@ export default function AddPrice() {
   const mutation = useMutation({
     mutationFn: addPrice,
     onSuccess: () => {
-      toast.success("Price recorded ✓");
+      const points = contrib.award(10);
+      toast.success(`Price recorded ✓ (+10 points, ${points} total)`);
       qc.invalidateQueries({ queryKey: ["prices"] });
       setForm({ product: "", price: "", location: "" });
       setServerErr(null);

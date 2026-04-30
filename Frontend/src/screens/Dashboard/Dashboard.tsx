@@ -6,12 +6,13 @@ import PriceCard from "@/components/cards/PriceCard";
 import EmptyState from "@/components/feedback/EmptyState";
 import Loader from "@/components/feedback/Loader";
 import ErrorBanner from "@/components/feedback/ErrorBanner";
-import { Boxes, TrendingUp, Zap, MapPin, Search, AlertTriangle } from "lucide-react";
-import { useAuth, auth, useT, currency, useCurrency } from "@/state/stores";
+import { Boxes, TrendingUp, Zap, MapPin, Search, AlertTriangle, Sparkles, Users, Brain } from "lucide-react";
+import { useAuth, auth, useT, currency, useCurrency, contrib } from "@/state/stores";
 import type { Role } from "@/types/api";
 import { computeAlerts } from "@/utils/alerts";
 import { fmtPrice } from "@/utils/format";
 import ParticleField from "@/components/ParticleField";
+import { categoryFor, feedbackLoopNote, externalFactorNote, marketTrendLabel } from "@/utils/trust";
 
 const ROLE_KEY: Record<Role, { t: any; s: any }> = {
   Buyer: { t: "hero.buyer.title", s: "hero.buyer.sub" },
@@ -29,9 +30,13 @@ export default function Dashboard() {
   const [search, setSearch] = useState("");
   const [loc, setLoc] = useState("all");
   const [trend, setTrend] = useState("all");
+  const [category, setCategory] = useState("all");
+  const points = contrib.usePoints();
+  const leaderboard = contrib.useLeaderboard();
 
   const list = prices ?? [];
   const locations = useMemo(() => Array.from(new Set(list.map((p) => p.location))), [list]);
+  const categories = useMemo(() => Array.from(new Set(list.map((p) => p.category ?? categoryFor(p.product)))), [list]);
 
   const filtered = useMemo(
     () =>
@@ -39,15 +44,18 @@ export default function Dashboard() {
         (p) =>
           (!search || p.product.toLowerCase().includes(search.toLowerCase())) &&
           (loc === "all" || p.location === loc) &&
-          (trend === "all" || p.trend === trend),
+          (trend === "all" || p.trend === trend) &&
+          (category === "all" || (p.category ?? categoryFor(p.product)) === category),
       ),
-    [list, search, loc, trend],
+    [list, search, loc, trend, category],
   );
 
   const tracked = list.length;
   const rising = list.filter((p) => p.trend === "increasing").length;
+  const falling = list.filter((p) => p.trend === "decreasing").length;
   const buyNow = list.filter((p) => p.action === "buy_now").length;
   const regions = new Set(list.map((p) => p.location)).size;
+  const overallTrend = marketTrendLabel(rising, falling);
 
   // Alerts: fetch history for first few products
   const alertQueries = useQueries({
@@ -145,6 +153,44 @@ export default function Dashboard() {
         </section>
       )}
 
+      <section className="grid lg:grid-cols-2 gap-5">
+        <div className="panel-elevated p-6 border-primary/30">
+          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.18em] text-primary mb-3">
+            <Brain className="size-3.5" /> Market intelligence
+          </div>
+          <div className="text-base leading-relaxed space-y-2">
+            <p>
+              Overall market trend: <span className="font-semibold text-primary">{overallTrend}</span>.
+            </p>
+            <p>{feedbackLoopNote()}</p>
+            <p className="text-muted-foreground">{externalFactorNote()}</p>
+          </div>
+        </div>
+
+        <div className="panel-elevated p-6 border-warning/30">
+          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-[0.18em] text-warning mb-3">
+            <Users className="size-3.5" /> Contribution incentives
+          </div>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <MetricCard label="Your Points" value={points} icon={Sparkles} highlight animate />
+            <div className="space-y-2">
+              <div className="text-xs font-mono uppercase tracking-[0.18em] text-muted-foreground">Top Contributors</div>
+              <div className="space-y-1.5">
+                {leaderboard.slice(0, 3).map((item, idx) => (
+                  <div key={item.name} className="flex items-center justify-between rounded-lg border border-border bg-background/40 px-3 py-2 text-sm">
+                    <span className="flex items-center gap-2">
+                      <span className="size-5 rounded-full bg-primary/10 text-primary text-[10px] flex items-center justify-center font-mono">{idx + 1}</span>
+                      {item.name}
+                    </span>
+                    <span className="font-mono text-primary">{item.points}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Filters */}
       <section className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[240px]">
@@ -173,6 +219,14 @@ export default function Dashboard() {
           <option value="increasing">{t("trend.increasing")}</option>
           <option value="decreasing">{t("trend.decreasing")}</option>
           <option value="stable">{t("trend.stable")}</option>
+        </select>
+        <select
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="bg-surface border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-primary/60"
+        >
+          <option value="all">All Categories</option>
+          {categories.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
       </section>
 
