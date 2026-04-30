@@ -14,10 +14,12 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='PriceBudgetUser',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=120)),
                 ('email', models.EmailField(max_length=254, unique=True)),
-                ('role', models.CharField(choices=[('buyer', 'Buyer'), ('seller', 'Seller'), ('admin', 'Admin')], default='buyer', max_length=12)),
+                ('role', models.CharField(choices=[
+                 ('buyer', 'Buyer'), ('seller', 'Seller'), ('admin', 'Admin')], default='buyer', max_length=12)),
                 ('points', models.PositiveIntegerField(default=0)),
                 ('is_active', models.BooleanField(default=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
@@ -35,12 +37,14 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='price',
             name='source',
-            field=models.CharField(choices=[('user', 'User Submitted Data'), ('demo', 'Simulated Demo Data')], default='demo', max_length=10),
+            field=models.CharField(choices=[('user', 'User Submitted Data'), (
+                'demo', 'Simulated Demo Data')], default='demo', max_length=10),
         ),
         migrations.AddField(
             model_name='price',
             name='submitted_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='price_entries', to='api.pricebudgetuser'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                    related_name='price_entries', to='api.pricebudgetuser'),
         ),
         migrations.AlterModelTable(
             name='price',
@@ -48,14 +52,17 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='pricebudgetuser',
-            index=models.Index(fields=['email'], name='pricebudget_email_1a9f4f_idx'),
+            index=models.Index(
+                fields=['email'], name='pricebudget_email_1a9f4f_idx'),
         ),
         migrations.AddIndex(
             model_name='pricebudgetuser',
-            index=models.Index(fields=['role'], name='pricebudget_role_b8df4e_idx'),
+            index=models.Index(
+                fields=['role'], name='pricebudget_role_b8df4e_idx'),
         ),
         migrations.AddIndex(
             model_name='price',
-            index=models.Index(fields=['product', 'date'], name='pricebudget_product_date_4cfca5_idx'),
+            index=models.Index(
+                fields=['product', 'date'], name='pricebudget_product_date_4cfca5_idx'),
         ),
     ]

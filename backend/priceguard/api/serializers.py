@@ -12,6 +12,7 @@ class PriceBudgetUserSerializer(serializers.ModelSerializer):
 class AwardPointsSerializer(serializers.Serializer):
     points = serializers.IntegerField(min_value=1)
 
+
 class PriceSerializer(serializers.ModelSerializer):
     date = serializers.DateTimeField(required=False, default=timezone.now)
 

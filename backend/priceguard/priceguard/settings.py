@@ -28,12 +28,14 @@ if str(REPO_ROOT) not in sys.path:
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-vec#p^9xpx(n=*1t#2!!a8h1ffpo5cf^0#nke7n%=v@#)!s+0%')
+SECRET_KEY = os.getenv(
+    'DJANGO_SECRET_KEY', 'django-insecure-vec#p^9xpx(n=*1t#2!!a8h1ffpo5cf^0#nke7n%=v@#)!s+0%')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'true').lower() == 'true'
 
-ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
+ALLOWED_HOSTS = [h.strip() for h in os.getenv(
+    'ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
 
 CORS_ALLOWED_ORIGINS = [
     origin.strip() for origin in os.getenv(

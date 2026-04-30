@@ -13,7 +13,8 @@ class PriceBudgetUser(models.Model):
 
     name = models.CharField(max_length=120)
     email = models.EmailField(unique=True)
-    role = models.CharField(max_length=12, choices=ROLE_CHOICES, default=ROLE_BUYER)
+    role = models.CharField(
+        max_length=12, choices=ROLE_CHOICES, default=ROLE_BUYER)
     points = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -41,7 +42,8 @@ class Price(models.Model):
     product = models.CharField(max_length=100, db_index=True)
     price = models.FloatField()
     location = models.CharField(max_length=100)
-    source = models.CharField(max_length=10, choices=SOURCE_CHOICES, default=SOURCE_DEMO)
+    source = models.CharField(
+        max_length=10, choices=SOURCE_CHOICES, default=SOURCE_DEMO)
     submitted_by = models.ForeignKey(
         PriceBudgetUser,
         on_delete=models.SET_NULL,
@@ -50,7 +52,8 @@ class Price(models.Model):
         related_name="price_entries",
     )
     confirmations = models.PositiveIntegerField(default=1)
-    date = models.DateTimeField(auto_now_add=False, auto_now=False, null=True, blank=True)
+    date = models.DateTimeField(
+        auto_now_add=False, auto_now=False, null=True, blank=True)
 
     class Meta:
         db_table = "pricebudget_prices"

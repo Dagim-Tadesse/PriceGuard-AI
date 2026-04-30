@@ -9,4 +9,3 @@ urlpatterns = [
     path('users/', users_view),
     path('users/<int:user_id>/award-points/', award_points),
 ]
-
