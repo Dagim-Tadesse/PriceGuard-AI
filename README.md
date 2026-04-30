@@ -129,6 +129,3 @@ This is optimized for interpretability and demo reliability rather than heavy mo
 - One-page demo guide: `docs/demo-script.md`
 - Architecture overview: `docs/architecture.md`
 
-## UI preview
-
-![PriceGuard dashboard](docs/assets/dashboard.png)
