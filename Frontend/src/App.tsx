@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useEffect } from "react";
 import Index from "./pages/Index.tsx";
+import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound.tsx";
 import Login from "./screens/Login/Login";
 import AddPrice from "./screens/AddPrice/AddPrice";
@@ -27,9 +28,10 @@ const App = () => {
       <Sonner />
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route element={<RequireAuth><AppShell /></RequireAuth>}>
-            <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Index />} />
             <Route path="/add-price" element={<AddPrice />} />
             <Route path="/history" element={<History />} />
             <Route path="/compare" element={<Compare />} />

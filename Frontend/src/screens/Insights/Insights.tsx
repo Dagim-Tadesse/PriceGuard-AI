@@ -6,6 +6,7 @@ import Loader from "@/components/feedback/Loader";
 import { useT } from "@/state/stores";
 import { fmtPrice } from "@/utils/format";
 import ParticleField from "@/components/ParticleField";
+import { categoryFor, externalFactorNote, marketTrendLabel } from "@/utils/trust";
 
 export default function Insights() {
   const t = useT();
@@ -18,7 +19,8 @@ export default function Insights() {
     const buyNow = list.filter(p => p.action === "buy_now");
     const cheapest = [...list].sort((a, b) => a.price - b.price)[0];
     const bundle = falling.slice(0, 3).map(p => p.product);
-    return { rising, falling, buyNow, cheapest, bundle };
+    const categories = Array.from(new Set(list.map((p) => p.category ?? categoryFor(p.product))));
+    return { rising, falling, buyNow, cheapest, bundle, categories };
   }, [list]);
 
   if (isLoading) return <Loader />;
@@ -54,6 +56,21 @@ export default function Insights() {
             <span className="font-mono text-primary">{fmtPrice(insights.cheapest.price)}</span>.
           </>)}
         </p>
+      </section>
+
+      <section className="panel p-6 border-border/70 bg-secondary/20">
+        <div className="flex items-center justify-between gap-4 flex-wrap mb-4">
+          <div className="font-display font-semibold">Market and category signals</div>
+          <div className="text-xs font-mono uppercase tracking-[0.18em] text-primary">{marketTrendLabel(insights.rising.length, insights.falling.length)}</div>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {insights.categories.map((category) => (
+            <span key={category} className="px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-sm">
+              {category}
+            </span>
+          ))}
+        </div>
+        <p className="mt-4 text-sm text-muted-foreground">{externalFactorNote()}</p>
       </section>
 
       <section className="grid md:grid-cols-2 gap-5">

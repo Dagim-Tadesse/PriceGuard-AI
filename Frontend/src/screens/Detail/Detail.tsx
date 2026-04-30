@@ -13,6 +13,7 @@ import { bestTimeMessage } from "@/utils/bestTime";
 import { toast } from "sonner";
 import ConfidenceRing from "@/components/ConfidenceRing";
 import { useT } from "@/state/stores";
+import { aggregationHint, categoryFor, confidenceLabel, lowDataWarning, sourceLabel, externalFactorNote } from "@/utils/trust";
 
 export default function Detail() {
   const t = useT();
@@ -30,6 +31,13 @@ export default function Detail() {
   const { data: pred } = useQuery({
     queryKey: ["prediction", product], queryFn: () => getPrediction(product), enabled: !!product,
   });
+
+  const sortedHistory = history ? [...history].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) : [];
+  const dataWarning = lowDataWarning(sortedHistory.length);
+  const confidenceText = pred ? confidenceLabel(pred.confidence) : "Low";
+  const source = product ? sourceLabel(product) : "Simulated Demo Data";
+  const category = product ? categoryFor(product) : "Food";
+  const aggregationText = aggregationHint(sortedHistory);
 
   const exportCsv = () => {
     if (!history?.length) return;
@@ -78,6 +86,12 @@ export default function Detail() {
         <EmptyState icon={Activity} title="No data yet" />
       ) : (
         <>
+          {dataWarning && (
+            <div className="panel p-4 border-warning/40 bg-warning/5 text-sm text-warning">
+              {dataWarning}
+            </div>
+          )}
+
           {pred && (
             <>
               <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -86,8 +100,13 @@ export default function Detail() {
                   <MetricCard label="Predicted Price" value={pred.predicted_price ? fmtPrice(pred.predicted_price) : "—"} icon={Target} highlight delay={80} />
                   <MetricCard label="Action" value={String(pred.action).replace("_", " ").toUpperCase()} icon={Zap} delay={160} />
                 </div>
-                <div className="panel-elevated p-6 flex items-center justify-center animate-scale-in">
-                  <ConfidenceRing value={pred.confidence} size={140} label="Confidence" />
+                <div className="panel-elevated p-6 flex flex-col items-center justify-center gap-4 animate-scale-in">
+                  <ConfidenceRing value={pred.confidence} size={140} label={confidenceText} />
+                  <div className="flex flex-wrap justify-center gap-2 text-[10px] font-mono uppercase tracking-[0.18em]">
+                    <span className="px-2.5 py-1 rounded-full bg-secondary border border-border">{source}</span>
+                    <span className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/25 text-primary">{category}</span>
+                    <span className="px-2.5 py-1 rounded-full bg-secondary border border-border">{aggregationText}</span>
+                  </div>
                 </div>
               </section>
 
@@ -107,6 +126,12 @@ export default function Detail() {
                   <p className="text-sm leading-relaxed text-foreground/90">{pred.reason}</p>
                 </div>
               )}
+
+              <div className="panel p-5 border-warning/30 bg-warning/5 text-sm leading-relaxed">
+                <div className="text-xs font-mono uppercase tracking-[0.18em] text-warning mb-2">Data trust</div>
+                <p className="mb-2">Confirmed by {Math.min(3, Math.max(1, history.length))} users.</p>
+                <p>{externalFactorNote()}</p>
+              </div>
             </>
           )}
 

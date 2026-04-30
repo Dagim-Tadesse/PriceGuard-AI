@@ -9,6 +9,7 @@ import MetricCard from "@/components/cards/MetricCard";
 import { History as HistoryIcon, TrendingUp, Target, Zap, Gauge } from "lucide-react";
 import { fmtDate, fmtPrice, pct } from "@/utils/format";
 import { useT } from "@/state/stores";
+import { aggregationHint, categoryFor, confidenceLabel, lowDataWarning, sourceLabel } from "@/utils/trust";
 
 export default function History() {
   const t = useT();
@@ -19,6 +20,13 @@ export default function History() {
   const { data: pred } = useQuery({
     queryKey: ["prediction", product], queryFn: () => getPrediction(product), enabled: !!product,
   });
+
+  const sortedHistory = history ? [...history].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) : [];
+  const dataWarning = lowDataWarning(sortedHistory.length);
+  const confidenceText = pred ? confidenceLabel(pred.confidence) : "Low";
+  const source = product ? sourceLabel(product) : "Simulated Demo Data";
+  const category = product ? categoryFor(product) : "Food";
+  const aggregationText = aggregationHint(sortedHistory);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -39,13 +47,28 @@ export default function History() {
         <EmptyState icon={HistoryIcon} title="No history yet for this product" />
       ) : (
         <>
+          {dataWarning && (
+            <div className="panel p-4 border-warning/40 bg-warning/5 text-sm text-warning">
+              {dataWarning}
+            </div>
+          )}
+
           {pred && (
-            <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <MetricCard label="Trend" value={String(pred.trend)} icon={TrendingUp} delay={0} />
-              <MetricCard label="Predicted Price" value={pred.predicted_price ? fmtPrice(pred.predicted_price) : "—"} icon={Target} delay={80} highlight />
-              <MetricCard label="Action" value={String(pred.action).replace("_", " ").toUpperCase()} icon={Zap} delay={160} />
-              <MetricCard label="Confidence" value={pct(pred.confidence)} icon={Gauge} delay={240} />
-            </section>
+            <>
+              <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <MetricCard label="Trend" value={String(pred.trend)} icon={TrendingUp} delay={0} />
+                <MetricCard label="Predicted Price" value={pred.predicted_price ? fmtPrice(pred.predicted_price) : "—"} icon={Target} delay={80} highlight />
+                <MetricCard label="Action" value={String(pred.action).replace("_", " ").toUpperCase()} icon={Zap} delay={160} />
+                <MetricCard label="Confidence" value={pct(pred.confidence)} icon={Gauge} delay={240} />
+              </section>
+
+              <div className="flex flex-wrap gap-2 text-[10px] font-mono uppercase tracking-[0.18em]">
+                <span className="px-2.5 py-1 rounded-full bg-secondary border border-border">{source}</span>
+                <span className="px-2.5 py-1 rounded-full bg-primary/10 border border-primary/25 text-primary">{category}</span>
+                <span className="px-2.5 py-1 rounded-full bg-secondary border border-border">{aggregationText}</span>
+                <span className="px-2.5 py-1 rounded-full bg-secondary border border-border">{confidenceText} confidence</span>
+              </div>
+            </>
           )}
 
           {pred?.reason && (

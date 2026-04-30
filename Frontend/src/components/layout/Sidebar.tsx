@@ -6,7 +6,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 import LangToggle from "@/components/LangToggle";
 
 const NAV = [
-  { to: "/", key: "nav.dashboard" as const, icon: LayoutDashboard },
+  { to: "/dashboard", key: "nav.dashboard" as const, icon: LayoutDashboard },
   { to: "/insights", key: "nav.insights" as const, icon: Brain },
   { to: "/add-price", key: "nav.addPrice" as const, icon: PlusCircle },
   { to: "/history", key: "nav.history" as const, icon: History },
@@ -81,20 +81,7 @@ export default function Sidebar() {
         )}
       </div>
 
-      <div className="relative px-6 py-4 border-t border-border space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="text-xs font-mono uppercase tracking-wider text-muted-foreground">{t("common.theme")}</div>
-          <ThemeToggle />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="text-xs font-mono uppercase tracking-wider text-muted-foreground">{t("common.language")}</div>
-          <LangToggle />
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="text-xs font-mono uppercase tracking-wider text-muted-foreground">{t("common.accessibility")}</div>
-          <Switch checked={a11y} onCheckedChange={() => ui.toggleA11y()} />
-        </div>
-      </div>
+      {/* Settings moved to top-right settings menu to reduce left-panel clutter */}
 
       {user && (
         <div className="relative px-6 py-4 border-t border-border flex items-center justify-between">

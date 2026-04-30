@@ -1,9 +1,13 @@
 import type { PriceSummary } from "@/types/api";
-import { TrendingUp, TrendingDown, Minus, Star, MapPin } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Star, MapPin, BadgeCheck, AlertTriangle, Users } from "lucide-react";
 import { fmtPrice } from "@/utils/format";
-import { useWatchlist, watchlist, useT, currency, useCurrency } from "@/state/stores";
+import { useWatchlist, watchlist, useT, currency, useCurrency, contrib } from "@/state/stores";
 import { useNavigate } from "react-router-dom";
 import Sparkline from "@/components/charts/Sparkline";
+import { useQuery } from "@tanstack/react-query";
+import { getHistory } from "@/services/priceService";
+import { aggregationHint, categoryFor, confirmationLabel, confidenceLabel, lowDataWarning, outlierWarning, sourceLabel } from "@/utils/trust";
+import { toast } from "sonner";
 
 interface Props { item: PriceSummary; delay?: number }
 
@@ -13,6 +17,16 @@ export default function PriceCard({ item, delay = 0 }: Props) {
   const items = useWatchlist();
   const watched = items.includes(item.product);
   const navigate = useNavigate();
+  const { data: history } = useQuery({ queryKey: ["history", item.product], queryFn: () => getHistory(item.product) });
+
+  const category = item.category ?? categoryFor(item.product);
+  const source = item.source ?? sourceLabel(item.product);
+  const trustHistory = history ?? [];
+  const confirmed = confirmationLabel(trustHistory);
+  const dataHint = aggregationHint(trustHistory);
+  const lowData = lowDataWarning(trustHistory.length);
+  const anomaly = outlierWarning(trustHistory);
+  const trustLevel = trustHistory.length >= 6 ? "High" : trustHistory.length >= 3 ? "Medium" : "Low";
 
   const TIcon = item.trend === "increasing" ? TrendingUp : item.trend === "decreasing" ? TrendingDown : Minus;
   const trendColor =
@@ -46,6 +60,31 @@ export default function PriceCard({ item, delay = 0 }: Props) {
         </button>
       </div>
 
+      <div className="flex flex-wrap items-center gap-2 mb-4 text-[10px] font-mono uppercase tracking-[0.18em]">
+        <span className="px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border">{category}</span>
+        <span className="px-2.5 py-1 rounded-full bg-primary/10 text-primary border border-primary/25">{source}</span>
+        <span className="px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border flex items-center gap-1">
+          <Users className="size-3" /> {confirmed}
+        </span>
+        <span className="px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border">{trustLevel} trust</span>
+      </div>
+
+      {(lowData || anomaly) && (
+        <div className="space-y-1.5 mb-4">
+          {lowData && (
+            <div className="flex items-center gap-1.5 text-[11px] text-warning font-medium">
+              <AlertTriangle className="size-3.5" /> {lowData}
+            </div>
+          )}
+          {anomaly && (
+            <div className="flex items-center gap-1.5 text-[11px] text-primary font-medium">
+              <BadgeCheck className="size-3.5" /> {anomaly}
+            </div>
+          )}
+          <div className="text-[11px] text-muted-foreground">{dataHint}</div>
+        </div>
+      )}
+
       <div className="relative flex items-end justify-between mb-4">
         <div>
           <div className="text-3xl font-display font-bold tabular">{currency.symbol()}{fmtPrice(currency.convert(item.price))}</div>
@@ -59,15 +98,27 @@ export default function PriceCard({ item, delay = 0 }: Props) {
       </div>
 
       <div className="relative flex items-center justify-between">
-        <span
-          className={`px-3 py-1.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider ${
-            isBuy
-              ? "bg-primary/15 text-primary border border-primary/40 animate-pulse-glow"
-              : "bg-secondary text-muted-foreground border border-border"
-          }`}
-        >
-          {isBuy ? `● ${t("common.buyNow")}` : t("common.wait")}
-        </span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span
+            className={`px-3 py-1.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider ${
+              isBuy
+                ? "bg-primary/15 text-primary border border-primary/40 animate-pulse-glow"
+                : "bg-secondary text-muted-foreground border border-border"
+            }`}
+          >
+            {isBuy ? `● ${t("common.buyNow")}` : t("common.wait")}
+          </span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              const total = contrib.award(5);
+              toast.success(`Confirmed price +5 points (${total} total)`);
+            }}
+            className="px-3 py-1.5 rounded-full text-xs font-mono font-semibold uppercase tracking-wider bg-primary/10 text-primary border border-primary/30 hover:bg-primary/15 transition"
+          >
+            Confirm price
+          </button>
+        </div>
         <span className="text-xs text-muted-foreground group-hover:text-primary transition">
           {t("common.viewDetail")}
         </span>
