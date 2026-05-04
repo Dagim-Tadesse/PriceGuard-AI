@@ -48,6 +48,40 @@ def get_price_history(request, product):
     return Response(serializer.data)
 
 
+@api_view(['PATCH'])
+def update_price(request, price_id):
+    price = Price.objects.filter(pk=price_id).first()
+    if not price:
+        return Response({"error": "Price not found"}, status=404)
+
+    serializer = PriceSerializer(price, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+
+    return Response({
+        "error": "Invalid price update",
+        "details": serializer.errors,
+    }, status=400)
+
+
+@api_view(['PATCH'])
+def confirm_price(request, price_id):
+    price = Price.objects.filter(pk=price_id).first()
+    if not price:
+        return Response({"error": "Price not found"}, status=404)
+
+    confirmations = request.data.get('confirmations', price.confirmations + 1)
+    try:
+        confirmations = int(confirmations)
+    except (TypeError, ValueError):
+        return Response({"error": "Confirmations must be an integer"}, status=400)
+
+    price.confirmations = max(1, confirmations)
+    price.save(update_fields=['confirmations'])
+    return Response(PriceSerializer(price).data)
+
+
 @api_view(['GET'])
 def get_prediction_view(request, product):
     result = get_prediction(product)
@@ -59,6 +93,20 @@ def users_view(request):
     if request.method == 'GET':
         users = PriceBudgetUser.objects.all().order_by('-points', 'name')
         return Response(PriceBudgetUserSerializer(users, many=True).data)
+
+    email = request.data.get('email')
+    existing = PriceBudgetUser.objects.filter(
+        email=email).first() if email else None
+    if existing:
+        serializer = PriceBudgetUserSerializer(
+            existing, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response({
+            "error": "Invalid user data",
+            "details": serializer.errors,
+        }, status=400)
 
     serializer = PriceBudgetUserSerializer(data=request.data)
     if serializer.is_valid():

@@ -20,6 +20,13 @@ function createStore<T>(initial: T) {
   };
 }
 
+function normalizeRole(role: string): Role {
+  const value = role.toLowerCase();
+  if (value === "seller") return "Seller";
+  if (value === "admin") return "Admin";
+  return "Buyer";
+}
+
 function useStore<T, S>(store: ReturnType<typeof createStore<T>>, selector: (s: T) => S): S {
   return useSyncExternalStore(
     store.subscribe,
@@ -43,14 +50,16 @@ const initialAuth: AuthState = (() => {
   if (typeof window === "undefined") return { user: null };
   try {
     const raw = localStorage.getItem(STORAGE_AUTH);
-    return raw ? { user: JSON.parse(raw) } : { user: null };
+    if (!raw) return { user: null };
+    const parsed = JSON.parse(raw) as { name: string; role: string };
+    return { user: { name: parsed.name, role: normalizeRole(parsed.role) } };
   } catch { return { user: null }; }
 })();
 const authStore = createStore<AuthState>(initialAuth);
 
 export const auth = {
   signIn: (name: string, role: Role) => {
-    const user = { name, role };
+    const user = { name, role: normalizeRole(role) };
     localStorage.setItem(STORAGE_AUTH, JSON.stringify(user));
     authStore.set({ user });
   },
@@ -61,7 +70,7 @@ export const auth = {
   setRole: (role: Role) => {
     const u = authStore.get().user;
     if (!u) return;
-    const user = { ...u, role };
+    const user = { ...u, role: normalizeRole(role) };
     localStorage.setItem(STORAGE_AUTH, JSON.stringify(user));
     authStore.set({ user });
   },

@@ -97,6 +97,7 @@ Backend:
 - Database guide: [database/README.md](database/README.md)
 
 ## Notes
+
 This README is the main entry point for the repository. The folder-level READMEs are the working handbooks for each subsystem.
 
 If CI fails due to CORS or host issues, see `docs/cors.md` for local development tips.
