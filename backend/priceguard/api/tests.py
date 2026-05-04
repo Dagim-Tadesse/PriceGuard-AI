@@ -1,7 +1,7 @@
 from django.test import TestCase
 from urllib.parse import quote
 
-from .models import Price
+from .models import Price, PriceBudgetUser, PointLedger
 
 
 class ApiEndpointTests(TestCase):
@@ -66,6 +66,46 @@ class ApiEndpointTests(TestCase):
         self.assertEqual(response.status_code, 201)
         self.assertEqual(Price.objects.filter(
             product="Tomatoes (1kg)").count(), 1)
+
+    def test_users_endpoint_lists_and_creates_role_based_users(self):
+        response = self.client.post(
+            "/api/users/",
+            data={
+                "name": "Ada Seller",
+                "email": "ada@example.com",
+                "role": "seller",
+                "points": 12,
+            },
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(PriceBudgetUser.objects.filter(
+            email="ada@example.com").count(), 1)
+
+        list_response = self.client.get("/api/users/")
+        self.assertEqual(list_response.status_code, 200)
+        self.assertGreaterEqual(len(list_response.json()), 1)
+
+    def test_award_points_endpoint_updates_user_points(self):
+        user = PriceBudgetUser.objects.create(
+            name="Point Tester",
+            email="points@example.com",
+            role="buyer",
+            points=7,
+        )
+
+        response = self.client.post(
+            f"/api/users/{user.id}/award-points/",
+            data={"points": 5},
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        user.refresh_from_db()
+        self.assertEqual(user.points, 12)
+        self.assertEqual(PointLedger.objects.filter(
+            user=user, points_delta=5).count(), 1)
 
     def test_accepts_requests_with_origin_header(self):
         # Simulate frontend origin; should not error even if CORS isn't configured

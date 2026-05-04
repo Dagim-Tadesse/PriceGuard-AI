@@ -31,6 +31,38 @@ class PriceBudgetUser(models.Model):
         return f"{self.name} ({self.role})"
 
 
+class PointLedger(models.Model):
+    EVENT_DAILY_BONUS = "daily_bonus"
+    EVENT_ADD_PRICE = "add_price"
+    EVENT_CONFIRM_PRICE = "confirm_price"
+    EVENT_MANUAL_AWARD = "manual_award"
+    EVENT_CHOICES = [
+        (EVENT_DAILY_BONUS, "Daily Bonus"),
+        (EVENT_ADD_PRICE, "Add Price"),
+        (EVENT_CONFIRM_PRICE, "Confirm Price"),
+        (EVENT_MANUAL_AWARD, "Manual Award"),
+    ]
+
+    user = models.ForeignKey(
+        PriceBudgetUser,
+        on_delete=models.CASCADE,
+        related_name="point_ledger_entries",
+    )
+    points_delta = models.IntegerField()
+    event_type = models.CharField(max_length=40, choices=EVENT_CHOICES)
+    note = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "pricebudget_points_ledger"
+        indexes = [
+            models.Index(fields=["user", "created_at"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id}: {self.points_delta} ({self.event_type})"
+
+
 class Price(models.Model):
     SOURCE_USER = "user"
     SOURCE_DEMO = "demo"

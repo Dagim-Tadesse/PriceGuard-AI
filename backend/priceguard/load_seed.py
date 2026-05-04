@@ -1,4 +1,4 @@
-from api.models import Price
+from api.models import Price, PriceBudgetUser
 import json
 import os
 import sys
@@ -23,8 +23,28 @@ with open(file_path) as f:
 
 if Price.objects.exists():
     print("Seed skipped: prices table already has data.")
-    print("If you want to re-seed, delete backend/priceguard/db.sqlite3 or run 'manage.py flush'.")
+    print("If you want to re-seed, truncate the Supabase tables or run 'manage.py flush'.")
     raise SystemExit(0)
+
+demo_users = [
+    {"name": "Demo Buyer", "email": "buyer@priceguard.local",
+        "role": PriceBudgetUser.ROLE_BUYER, "points": 25},
+    {"name": "Demo Seller", "email": "seller@priceguard.local",
+        "role": PriceBudgetUser.ROLE_SELLER, "points": 40},
+    {"name": "Demo Admin", "email": "admin@priceguard.local",
+        "role": PriceBudgetUser.ROLE_ADMIN, "points": 75},
+]
+
+for user in demo_users:
+    PriceBudgetUser.objects.get_or_create(
+        email=user["email"],
+        defaults={
+            "name": user["name"],
+            "role": user["role"],
+            "points": user["points"],
+            "is_active": True,
+        },
+    )
 
 for item in data:
     product = item["product"]  # preserve original casing
@@ -35,6 +55,7 @@ for item in data:
             product=product,
             price=entry["price"],
             location=location,
+            source=Price.SOURCE_DEMO,
             date=timezone.make_aware(
                 datetime.strptime(entry["date"], "%Y-%m-%d"),
                 timezone.get_current_timezone(),

@@ -6,9 +6,9 @@ PriceGuard-AI is split by responsibility, but integrates through stable API cont
 
 ```mermaid
 flowchart LR
-    U[User] --> F[Streamlit Frontend]
+    U[User] --> F[React Frontend]
     F -->|HTTP JSON| B[Django REST API]
-    B -->|ORM| D[(SQLite DB)]
+    B -->|ORM| D[(Supabase Postgres)]
     B -->|price history dataframe| A[AI Model Module]
     A -->|trend/prediction/action| B
     B -->|JSON response| F
@@ -31,9 +31,9 @@ flowchart LR
 
 ## Data flow
 
-1. User adds or views price data in Streamlit.
+1. User adds or views price data in the React frontend.
 2. Frontend calls Django API endpoints under `/api`.
-3. Backend reads/writes data via Django ORM and SQLite.
+3. Backend reads/writes data via Django ORM and Supabase Postgres.
 4. Backend calls the AI model for prediction endpoints.
 5. API returns trend and recommendation fields to frontend cards/pages.
 

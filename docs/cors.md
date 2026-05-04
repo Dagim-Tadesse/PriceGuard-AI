@@ -2,12 +2,12 @@ CORS and Local Run Notes
 
 Purpose
 
-This document explains how to run the Streamlit frontend and Django backend on separate ports/machines during local development and what minimal settings are required (CORS, `ALLOWED_HOSTS`) to allow the demo to run smoothly.
+This document explains how to run the React frontend and Django backend on separate ports/machines during local development and what minimal settings are required (CORS, `ALLOWED_HOSTS`) to allow the demo to run smoothly.
 
 Quick summary
 
 - Backend (Django) typically runs at `http://127.0.0.1:8000`.
-- Frontend (Streamlit) typically runs at `http://localhost:8501`.
+- Frontend (Vite dev server) typically runs at `http://127.0.0.1:5173` or `http://localhost:5173`.
 - To allow the frontend to call the backend when they run on different origins, enable CORS on the Django app.
 
 Steps
@@ -42,17 +42,17 @@ MIDDLEWARE = [
 ```py
 # Recommended for local dev: explicit allowed origins
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:8501',
-    'http://127.0.0.1:8501',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
 ]
 
 # OR (demo convenience): allow all origins
 # CORS_ALLOW_ALL_ORIGINS = True
 ```
 
-3. `ALLOWED_HOSTS` and Streamlit
+3. `ALLOWED_HOSTS` and frontend
 
-- If you run Streamlit and Django on the same machine, the backend should accept the hostnames used by Streamlit and the browser. In `backend/priceguard/settings.py` set:
+- If you run frontend and Django on the same machine, the backend should accept the hostnames used by the browser. In `backend/priceguard/settings.py` set:
 
 ```py
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
@@ -78,14 +78,15 @@ Start the frontend (from `Frontend` folder):
 
 ```powershell
 cd Frontend
-streamlit run app.py
+npm install
+npm run dev
 ```
 
 5. Troubleshooting
 
-- CORS errors in browser console: ensure the exact origin `http://localhost:8501` is listed in `CORS_ALLOWED_ORIGINS` or set `CORS_ALLOW_ALL_ORIGINS = True` for quick demos.
+- CORS errors in browser console: ensure frontend origins like `http://localhost:5173` and `http://127.0.0.1:5173` are listed in `CORS_ALLOWED_ORIGINS` or set `CORS_ALLOW_ALL_ORIGINS = True` for quick demos.
 - `DisallowedHost` errors when accessing backend: add the requested hostname to `ALLOWED_HOSTS` or run with `python manage.py runserver 0.0.0.0:8000` and include `0.0.0.0` variant in allowed hosts via env config.
-- If using Streamlit cloud or another remote host, add the deployed origin to `CORS_ALLOWED_ORIGINS`.
+- If using a deployed frontend host, add the deployed origin to `CORS_ALLOWED_ORIGINS`.
 
 Notes on security
 

@@ -8,6 +8,7 @@ import Index from "./pages/Index.tsx";
 import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound.tsx";
 import Login from "./screens/Login/Login";
+import Signup from "./screens/Login/Signup";
 import AddPrice from "./screens/AddPrice/AddPrice";
 import History from "./screens/History/History";
 import Compare from "./screens/Compare/Compare";
@@ -30,6 +31,7 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
           <Route element={<RequireAuth><AppShell /></RequireAuth>}>
             <Route path="/dashboard" element={<Index />} />
             <Route path="/add-price" element={<AddPrice />} />

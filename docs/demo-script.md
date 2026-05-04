@@ -5,7 +5,7 @@ This script is designed for a 90-120 second hackathon demo of PriceGuard-AI.
 ## 0. Setup checklist (30 seconds before presenting)
 
 - Backend running at `http://127.0.0.1:8000`
-- Frontend running via Streamlit (`Frontend/app.py`)
+- Frontend running at `http://127.0.0.1:5173` (`Frontend/`)
 - Fresh demo data loaded (`scripts/reset-demo.ps1`)
 - Open browser tabs:
   - Dashboard (`/`)

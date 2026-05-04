@@ -1,37 +1,33 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { auth, contrib } from "@/state/stores";
-import type { Role } from "@/types/api";
-import { Activity, ShieldCheck, ShoppingCart, Store, Crown } from "lucide-react";
+import { Activity, ShieldCheck, Mail, Lock } from "lucide-react";
 import { toast } from "sonner";
-import { useT } from "@/state/stores";
+import { useT, contrib } from "@/state/stores";
 import ThemeToggle from "@/components/ThemeToggle";
 import LangToggle from "@/components/LangToggle";
-
-const ACCOUNTS: { name: string; role: Role; icon: any; tagline: string }[] = [
-  { name: "Buyer Demo", role: "Buyer", icon: ShoppingCart, tagline: "Find the smartest moment to buy." },
-  { name: "Seller Demo", role: "Seller", icon: Store, tagline: "Spot rising demand before competitors." },
-  { name: "Admin Demo", role: "Admin", icon: Crown, tagline: "Monitor every market signal." },
-];
+import { signInWithPassword } from "@/services/authService";
 
 export default function Login() {
   const t = useT();
   const navigate = useNavigate();
-  const [selected, setSelected] = useState<number>(0);
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== "priceguard") {
-      toast.error("Invalid password. Use: priceguard");
-      return;
+    setLoading(true);
+    try {
+      const profile = await signInWithPassword(email, password);
+      const awarded = contrib.awardDailyBonus();
+      toast.success(`Welcome, ${profile.name}`);
+      if (awarded) toast.success("Daily activity bonus +5 points");
+      navigate("/dashboard");
+    } catch (err: any) {
+      toast.error(err?.message ?? "Could not sign in");
+    } finally {
+      setLoading(false);
     }
-    const acc = ACCOUNTS[selected];
-    auth.signIn(acc.name, acc.role);
-    const awarded = contrib.awardDailyBonus();
-    toast.success(`Welcome, ${acc.name}`);
-    if (awarded) toast.success("Daily activity bonus +5 points");
-    navigate("/dashboard");
   };
 
   return (
@@ -65,59 +61,44 @@ export default function Login() {
 
         <form onSubmit={submit} className="panel-elevated p-8 space-y-6 animate-scale-in shadow-glow">
           <div>
-            <div className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground mb-3">
-              {t("login.choose")}
-            </div>
-            <div className="grid grid-cols-1 gap-2">
-              {ACCOUNTS.map((a, i) => {
-                const Icon = a.icon;
-                const active = selected === i;
-                return (
-                  <button
-                    key={a.name}
-                    type="button"
-                    onClick={() => setSelected(i)}
-                    className={`group flex items-center gap-4 p-4 rounded-xl border text-left transition-all ${
-                      active
-                        ? "border-primary/50 bg-primary/10 shadow-glow"
-                        : "border-border bg-surface hover:border-primary/30"
-                    }`}
-                  >
-                    <div className={`size-10 rounded-lg flex items-center justify-center ${
-                      active ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
-                    }`}>
-                      <Icon className="size-5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-medium">{a.name}</div>
-                      <div className="text-xs text-muted-foreground truncate">{a.tagline}</div>
-                    </div>
-                    <div className={`text-[10px] font-mono uppercase tracking-wider ${
-                      active ? "text-primary" : "text-muted-foreground"
-                    }`}>{a.role}</div>
-                  </button>
-                );
-              })}
+            <label className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground">Email</label>
+            <div className="relative mt-2">
+              <Mail className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="you@example.com"
+                className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-primary/60 focus:shadow-glow transition"
+              />
             </div>
           </div>
 
           <div>
-            <label className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground">{t("login.access")}</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="priceguard"
-              className="mt-2 w-full bg-background border border-border rounded-xl px-4 py-3 font-mono text-sm focus:outline-none focus:border-primary/60 focus:shadow-glow transition"
-            />
-            <div className="text-[10px] text-muted-foreground mt-1.5 font-mono">{t("login.demoPwd")}</div>
+            <label className="text-xs font-mono uppercase tracking-[0.2em] text-muted-foreground">Password</label>
+            <div className="relative mt-2">
+              <Lock className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Your password"
+                className="w-full bg-background border border-border rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-primary/60 focus:shadow-glow transition"
+              />
+            </div>
+            <div className="text-[10px] text-muted-foreground mt-1.5 font-mono">Your saved role is loaded automatically after signin.</div>
+          </div>
+
+          <div className="text-sm text-center">
+            <a href="/signup" className="text-primary">Create an account</a>
           </div>
 
           <button
             type="submit"
-            className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold tracking-wide hover:bg-primary-glow transition-all hover:shadow-glow-strong active:scale-[0.98]"
+            disabled={loading}
+            className="w-full py-3.5 rounded-xl bg-primary text-primary-foreground font-semibold tracking-wide hover:bg-primary-glow transition-all hover:shadow-glow-strong active:scale-[0.98] disabled:opacity-60"
           >
-            {t("login.cta")}
+            {loading ? "Signing in…" : t("login.cta")}
           </button>
         </form>
       </div>

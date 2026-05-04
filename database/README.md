@@ -1,28 +1,57 @@
-# PriceGuard AI - Database Architecture & Seed Data
+# Database
 
-## 📌 Overview
-This folder contains the single source of truth for the PriceGuard AI system data. 
+This folder contains the database schema and demo seed assets for PriceGuard-AI.
 
-## 🏗️ 1. Schema Structure (`schema.sql`)
-We are using a flat table structure to make time-series AI predictions and backend querying as fast and simple as possible.
-- **Table Name:** `prices`
-- **Fields:** `id` (PK), `product` (str), `price` (float), `location` (str), `date` (timestamp)
+## What it does
 
-*Note for Backend (Django): Please ensure your models.py uses these exact field names so the data syncs perfectly.*
+The database layer is the persistent source of truth for users, prices, and points tracking.
 
-## 🧪 2. Demo Data (`seed.json`)
-The `seed.json` file contains realistic, time-ordered market data specifically engineered for our AI model to detect trends.
+It is responsible for:
 
-**Key Data Stories included for Demo:**
-1. 📈 **Cooking Oil (5L):** Shows a clear **Increasing Trend** (Inflation). Includes price variations between Bole and Merkato.
-2. 📉 **Tomatoes (1kg):** Shows a clear **Decreasing Trend** (Seasonal drop).
-3. ➖ **Bread (Loaf):** Shows a **Stable Trend** (Price control).
+- Defining the Supabase/Postgres tables.
+- Keeping demo data deterministic and easy to reseed.
+- Supporting time-series queries for the backend and AI layer.
+- Applying row-level security rules for browser-safe demo access.
 
-**Formatting Rules Applied:**
-- Ordered by Date ASC (Oldest to Newest).
-- No missing values.
-- Clean, consistent product naming conventions.
+## Main files
 
-## 🛠️ Usage
-AI/ML Member: You can parse the JSON directly to test your forecasting models right now.
-Backend Member: You can use this JSON to populate the Django database.
+- `schema.sql` - schema definition, indexes, and RLS policies.
+- `data.sql` - seed script for demo users and product histories.
+- `seed.json` - sample structured data for experiments or import tools.
+
+## Core tables
+
+The current schema centers on the `pricebudget_*` namespace:
+
+- `pricebudget_users` - buyer, seller, and admin profiles.
+- `pricebudget_prices` - product price history rows.
+- `pricebudget_points_ledger` - audit trail for point changes.
+
+## How it communicates
+
+The database is not accessed directly by the browser in production code. Instead:
+
+- Django reads and writes through ORM models.
+- The frontend can read certain Supabase-backed rows directly when RLS allows it.
+- The AI layer uses the price history to calculate trend and recommendation output.
+
+## Developer notes
+
+- Keep column names stable; the backend serializers and model code depend on them.
+- If you change RLS policies, re-test the frontend dashboard and signup flow.
+- If the dashboard is empty, confirm the seed ran and the policies permit the intended read path.
+- For demo data resets, prefer repeatable seed scripts over manual edits.
+
+## Working with the schema
+
+Typical workflow:
+
+1. Update `schema.sql` when the table shape or policies change.
+2. Update backend models and serializers to match.
+3. Refresh `data.sql` so demo data still tells a clear story.
+4. Re-run the schema and seed in Supabase or your local database.
+
+## Notes for the team
+
+- This folder is the place to reason about schema shape, demo data, and safe resets.
+- Keep documentation and seed data aligned so the demo always shows meaningful price trends.
