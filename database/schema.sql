@@ -68,9 +68,7 @@ WITH
 DROP POLICY IF EXISTS pricebudget_prices_update_anon ON pricebudget_prices;
 
 CREATE POLICY pricebudget_prices_update_anon ON pricebudget_prices FOR
-UPDATE
-    TO anon
-USING (true)
+UPDATE TO anon USING (true)
 WITH
     CHECK (true);
 
