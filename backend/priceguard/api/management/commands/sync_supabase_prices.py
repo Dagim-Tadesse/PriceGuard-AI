@@ -8,15 +8,18 @@ class Command(BaseCommand):
     help = "Sync prices from Supabase REST into the local Price model"
 
     def add_arguments(self, parser):
-        parser.add_argument("--table", default="prices", help="Supabase table name to fetch")
+        parser.add_argument("--table", default="prices",
+                            help="Supabase table name to fetch")
 
     def handle(self, *args, **options):
         SUPA_URL = os.getenv("SUPABASE_URL") or os.getenv("VITE_SUPABASE_URL")
-        SUPA_KEY = os.getenv("SUPABASE_ANON_KEY") or os.getenv("VITE_SUPABASE_ANON_KEY")
+        SUPA_KEY = os.getenv("SUPABASE_ANON_KEY") or os.getenv(
+            "VITE_SUPABASE_ANON_KEY")
         table = options.get("table")
 
         if not SUPA_URL or not SUPA_KEY:
-            self.stderr.write("SUPABASE_URL and SUPABASE_ANON_KEY (or VITE_* equivalents) must be set in the environment")
+            self.stderr.write(
+                "SUPABASE_URL and SUPABASE_ANON_KEY (or VITE_* equivalents) must be set in the environment")
             return
 
         endpoint = f"{SUPA_URL.rstrip('/')}/rest/v1/{table}"
@@ -27,7 +30,8 @@ class Command(BaseCommand):
         }
 
         self.stdout.write(f"Fetching rows from Supabase table: {table}")
-        resp = requests.get(endpoint, headers=headers, params={"select": "*"}, timeout=30)
+        resp = requests.get(endpoint, headers=headers, params={
+                            "select": "*"}, timeout=30)
         resp.raise_for_status()
         rows = resp.json()
         self.stdout.write(f"Fetched {len(rows)} rows")
@@ -47,7 +51,8 @@ class Command(BaseCommand):
             except Exception:
                 price = None
 
-            date_str = r.get("date") or r.get("created_at") or r.get("timestamp")
+            date_str = r.get("date") or r.get(
+                "created_at") or r.get("timestamp")
             date = None
             if date_str:
                 try:
@@ -60,7 +65,8 @@ class Command(BaseCommand):
                 continue
 
             # Avoid exact duplicates by matching product+location+price+date
-            q = Price.objects.filter(product__iexact=product, location__iexact=location, price=price)
+            q = Price.objects.filter(
+                product__iexact=product, location__iexact=location, price=price)
             if date:
                 q = q.filter(date=date)
 
@@ -69,7 +75,8 @@ class Command(BaseCommand):
                 continue
 
             # Insert with SOURCE_USER if a user is present, else demo
-            source = r.get("source") or ("user" if r.get("submitted_by") else "demo")
+            source = r.get("source") or (
+                "user" if r.get("submitted_by") else "demo")
 
             # Use a null submitted_by; linking by email would require looking up the user table
             Price.objects.create(
@@ -81,4 +88,5 @@ class Command(BaseCommand):
             )
             imported += 1
 
-        self.stdout.write(self.style.SUCCESS(f"Imported: {imported}, Skipped: {skipped}"))
+        self.stdout.write(self.style.SUCCESS(
+            f"Imported: {imported}, Skipped: {skipped}"))
