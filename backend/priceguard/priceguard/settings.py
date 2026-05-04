@@ -59,7 +59,7 @@ ALLOWED_HOSTS = [h.strip() for h in os.getenv(
 CORS_ALLOWED_ORIGINS = [
     origin.strip() for origin in os.getenv(
         'CORS_ALLOWED_ORIGINS',
-        'http://localhost:5173,http://127.0.0.1:5173'
+        'http://localhost:5173,http://127.0.0.1:5173,http://localhost:8080,http://127.0.0.1:8080'
     ).split(',') if origin.strip()
 ]
 
@@ -115,13 +115,22 @@ if not DATABASE_URL:
         'DATABASE_URL (or SUPABASE_DATABASE_URL) is required. Set it to your Supabase Postgres connection string in .env.'
     )
 
-DATABASES = {
-    'default': dj_database_url.parse(
-        DATABASE_URL,
-        conn_max_age=600,
-        ssl_require=os.getenv('DB_SSL_REQUIRE', 'true').lower() == 'true',
-    )
-}
+if DATABASE_URL.startswith('sqlite:'):
+    sqlite_name = DATABASE_URL.replace('sqlite:///', '', 1)
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / sqlite_name,
+        }
+    }
+else:
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=os.getenv('DB_SSL_REQUIRE', 'true').lower() == 'true',
+        )
+    }
 
 
 # Password validation

@@ -4,6 +4,8 @@ from .views import *
 urlpatterns = [
     path('prices/', get_prices),
     path('prices/add/', add_price),
+    path('prices/<int:price_id>/', update_price),
+    path('prices/<int:price_id>/confirm/', confirm_price),
     path('prices/<str:product>/', get_price_history),
     path('prediction/<str:product>/', get_prediction_view),
     path('users/', users_view),
