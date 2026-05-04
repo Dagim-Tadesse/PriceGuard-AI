@@ -97,5 +97,59 @@ Backend:
 - Database guide: [database/README.md](database/README.md)
 
 ## Notes
-
 This README is the main entry point for the repository. The folder-level READMEs are the working handbooks for each subsystem.
+
+If CI fails due to CORS or host issues, see `docs/cors.md` for local development tips.
+
+## What makes this different
+
+- Demo-first reliability: one-command setup, reset/seed scripts, and smoke-tested API flow.
+- Explainable recommendations: each prediction includes trend, confidence, action, and plain-English reason.
+- Practical UX for decisions: dashboard summary, filters, comparison by location, watchlist, and alerts.
+- Fast local reproducibility: pinned dependencies and CI checks for frontend + backend.
+
+## How the AI recommendation works
+
+The backend prediction endpoint combines recent price history with lightweight logic in `Ai/model.py`.
+
+At a high level:
+
+1. Fetch product history from the backend database.
+2. If data is insufficient, return a safe fallback response with a clear reason.
+3. If enough data exists, estimate short-term movement and derive:
+   - `trend` (`increasing`, `decreasing`, `stable`)
+   - `predicted_price`
+   - `action` (`buy_now` or `wait`)
+   - `confidence`
+   - `reason` (plain-English explanation)
+
+This is optimized for interpretability and demo reliability rather than heavy model complexity.
+
+## Troubleshooting
+
+- Backend not reachable from frontend
+  - Ensure Django is running on port `8000`.
+  - Run: `\.venv\Scripts\python.exe backend\priceguard\manage.py runserver 8000`
+
+- Frontend command not found
+  - Ensure Node.js is installed.
+  - From `Frontend/`, run `npm install` once, then `npm run dev`.
+
+- CORS or `DisallowedHost` errors
+  - Review `docs/cors.md` and add required origins/hosts.
+
+- Empty dashboard data
+  - Reset and reseed demo data:
+  - `\.\scripts\reset-demo.ps1`
+
+- Prediction unavailable for a product
+  - Add more price entries for that product; sparse history returns a safe fallback.
+
+- Verify backend quickly
+  - Run unit tests: `\.venv\Scripts\python.exe backend\priceguard\manage.py test`
+  - Run smoke test: `\.venv\Scripts\python.exe scripts\smoke_test.py`
+
+## Presenter resources
+
+- One-page demo guide: `docs/demo-script.md`
+- Architecture overview: `docs/architecture.md`
