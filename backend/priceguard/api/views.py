@@ -1,6 +1,6 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Price, PriceBudgetUser
+from .models import Price, PriceBudgetUser, PointLedger
 from .serializers import PriceSerializer, PriceBudgetUserSerializer, AwardPointsSerializer
 from .services import get_product_history, get_prediction, get_all_products
 
@@ -84,7 +84,14 @@ def award_points(request, user_id):
     if not user:
         return Response({"error": "User not found"}, status=404)
 
-    user.points += payload.validated_data['points']
+    delta = payload.validated_data['points']
+    user.points += delta
     user.save(update_fields=['points', 'updated_at'])
+    PointLedger.objects.create(
+        user=user,
+        points_delta=delta,
+        event_type=PointLedger.EVENT_MANUAL_AWARD,
+        note="Awarded via API",
+    )
 
     return Response(PriceBudgetUserSerializer(user).data)

@@ -1,6 +1,9 @@
 import type { ApiError } from "@/types/api";
 
-const BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "http://127.0.0.1:8000/api";
+const BASE =
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ??
+  (import.meta.env.VITE_BACKEND_BASE_URL as string | undefined) ??
+  "http://127.0.0.1:8000/api";
 
 function makeError(message: string, opts: Partial<ApiError> = {}): ApiError {
   const err = new Error(message) as ApiError;

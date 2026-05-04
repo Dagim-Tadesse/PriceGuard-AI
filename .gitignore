@@ -10,9 +10,6 @@ __pycache__/
 # Local databases
 *.sqlite3
 
-# Streamlit
-.streamlit/
-
 # OS
 .DS_Store
 Thumbs.db

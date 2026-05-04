@@ -6,9 +6,9 @@ PriceGuard AI is a backend service built with Django and Django REST Framework t
 
 The system enables users to:
 
-* Track price changes over time
-* Analyze trends (increasing, decreasing, stable)
-* Receive AI-driven recommendations (buy now or wait)
+- Track price changes over time
+- Analyze trends (increasing, decreasing, stable)
+- Receive AI-driven recommendations (buy now or wait)
 
 ---
 
@@ -35,13 +35,11 @@ backend/
 
 ## Tech Stack
 
-* Python 3.x
-* Django
-* Django REST Framework
-* SQLite (default, easily replaceable)
-* Custom AI logic (no external ML dependency)
-
----
+- Python 3.x
+- Django
+- Django REST Framework
+- Supabase Postgres (DATABASE_URL)
+- Custom AI logic (no external ML dependency)
 
 ## Database Model
 
@@ -53,8 +51,6 @@ backend/
 | price    | FloatField | Price value                |
 | location | CharField  | Market/store location      |
 | date     | DateTime   | Timestamp (auto-generated) |
-
----
 
 ## API Endpoints
 
@@ -130,10 +126,10 @@ Response:
 
 The backend integrates a custom AI module:
 
-* **Trend Detection**
-* **Next Price Prediction**
-* **Confidence Scoring**
-* **Decision Engine (buy_now / wait)**
+- **Trend Detection**
+- **Next Price Prediction**
+- **Confidence Scoring**
+- **Decision Engine (buy_now / wait)**
 
 ### Flow:
 
@@ -202,9 +198,9 @@ python manage.py runserver
 
 Use:
 
-* Browser
-* Postman
-* Curl
+- Browser
+- Postman
+- Curl
 
 Example:
 
@@ -216,19 +212,20 @@ http://127.0.0.1:8000/api/prices/
 
 ## Design Principles
 
-* Keep views lightweight
-* Move logic to services layer
-* Maintain consistent API response format
-* Decouple AI logic from Django core
+- Keep views lightweight
+- Move logic to services layer
+- Maintain consistent API response format
+- Decouple AI logic from Django core
+- Use Supabase Postgres as the only runtime database
 
 ---
 
 ## Success Criteria
 
-* APIs respond correctly
-* AI predictions are dynamic
-* Frontend integrates without issues
-* System handles real-world price fluctuations
+- APIs respond correctly
+- AI predictions are dynamic
+- Frontend integrates without issues
+- System handles real-world price fluctuations
 
 ---
 

@@ -1,6 +1,6 @@
 # Setup
 
-This repo includes a working Django backend, Streamlit frontend, and a Python AI module.
+This repo includes a Django backend, a React frontend, and a Python AI module.
 
 ## Shared requirement
 
@@ -20,7 +20,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned
 
 ```powershell
 python -m pip install -U pip
-python -m pip install "Django>=4.2" djangorestframework streamlit requests
+python -m pip install -r requirements.txt
 ```
 
 ### 3) Migrate + (optional) seed demo data
@@ -40,10 +40,12 @@ python backend\priceguard\manage.py runserver 8000
 
 Backend base URL: `http://127.0.0.1:8000/api`
 
-### 5) Run Streamlit frontend
+### 5) Run frontend
 
 In a new terminal:
 
 ```powershell
-streamlit run Frontend\app.py
+cd Frontend
+npm install
+npm run dev
 ```

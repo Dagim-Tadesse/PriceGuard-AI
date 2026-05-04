@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery, useQueries } from "@tanstack/react-query";
 import { getHistory, getPrices } from "@/services/priceService";
 import MetricCard from "@/components/cards/MetricCard";
@@ -6,7 +7,7 @@ import PriceCard from "@/components/cards/PriceCard";
 import EmptyState from "@/components/feedback/EmptyState";
 import Loader from "@/components/feedback/Loader";
 import ErrorBanner from "@/components/feedback/ErrorBanner";
-import { Boxes, TrendingUp, Zap, MapPin, Search, AlertTriangle, Sparkles, Users, Brain } from "lucide-react";
+import { Boxes, TrendingUp, Zap, MapPin, Search, AlertTriangle, Sparkles, Users, Brain, RefreshCw } from "lucide-react";
 import { useAuth, auth, useT, currency, useCurrency, contrib } from "@/state/stores";
 import type { Role } from "@/types/api";
 import { computeAlerts } from "@/utils/alerts";
@@ -25,7 +26,11 @@ export default function Dashboard() {
   useCurrency();
   const { user } = useAuth();
   const role = user?.role ?? "Buyer";
-  const { data: prices, isLoading, error } = useQuery({ queryKey: ["prices"], queryFn: getPrices });
+  const { data: prices, isLoading, isFetching, error, refetch } = useQuery({
+    queryKey: ["prices"],
+    queryFn: getPrices,
+    refetchOnWindowFocus: true,
+  });
 
   const [search, setSearch] = useState("");
   const [loc, setLoc] = useState("all");
@@ -110,6 +115,24 @@ export default function Dashboard() {
               </button>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="grid gap-4 md:grid-cols-3 animate-fade-in">
+        <div className={`panel-elevated p-5 ${role === "Buyer" ? "border-primary/40 bg-primary/5" : ""}`}>
+          <div className="text-xs font-mono uppercase tracking-[0.18em] text-primary mb-2">Buyer</div>
+          <p className="text-sm text-muted-foreground">Report prices, compare regions, and watch buy-now signals.</p>
+          <Link to="/add-price" className="inline-flex mt-4 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium">Report a price</Link>
+        </div>
+        <div className={`panel-elevated p-5 ${role === "Seller" ? "border-primary/40 bg-primary/5" : ""}`}>
+          <div className="text-xs font-mono uppercase tracking-[0.18em] text-primary mb-2">Seller</div>
+          <p className="text-sm text-muted-foreground">Add new listings and edit the latest price entry in the detail view.</p>
+          <Link to="/detail" className="inline-flex mt-4 px-4 py-2 rounded-xl border border-border bg-background text-sm font-medium">Edit latest entry</Link>
+        </div>
+        <div className={`panel-elevated p-5 ${role === "Admin" ? "border-primary/40 bg-primary/5" : ""}`}>
+          <div className="text-xs font-mono uppercase tracking-[0.18em] text-primary mb-2">Admin</div>
+          <p className="text-sm text-muted-foreground">Review the whole market and confirm or correct high-impact rows.</p>
+          <Link to="/detail" className="inline-flex mt-4 px-4 py-2 rounded-xl border border-border bg-background text-sm font-medium">Admin review</Link>
         </div>
       </section>
 
@@ -228,6 +251,15 @@ export default function Dashboard() {
           <option value="all">All Categories</option>
           {categories.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
+        <button
+          type="button"
+          onClick={() => refetch()}
+          disabled={isFetching}
+          className="inline-flex items-center gap-2 bg-surface border border-border rounded-xl px-4 py-2.5 text-sm font-medium hover:border-primary/60 hover:text-primary transition disabled:opacity-60"
+        >
+          <RefreshCw className={`size-4 ${isFetching ? "animate-spin" : ""}`} />
+          Refresh data
+        </button>
       </section>
 
       {/* Cards */}
@@ -237,7 +269,17 @@ export default function Dashboard() {
         <EmptyState
           icon={Boxes}
           title="No products match your filters"
-          description="Try clearing filters or adding new prices."
+          description="The Supabase table is empty or your current filters are hiding the rows."
+          action={(
+            <button
+              type="button"
+              onClick={() => refetch()}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition"
+            >
+              <RefreshCw className="size-4" />
+              Refresh from Supabase
+            </button>
+          )}
         />
       ) : (
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
