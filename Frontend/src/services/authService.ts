@@ -115,6 +115,9 @@ async function insertUserProfile(name: string, email: string, role: string) {
 
 async function fetchUserProfile(email: string): Promise<UserProfile> {
   const users = await apiFetch<UserProfile[]>("/users/");
+  if (!Array.isArray(users)) {
+    throw new Error("API did not return a valid user list. If deployed, ensure VITE_API_BASE_URL points to your hosted Django backend.");
+  }
   const profile = users.find((user) => user.email.toLowerCase() === email.toLowerCase());
   if (!profile) throw new Error("No profile found for this account. Please sign up first.");
   return profile;
