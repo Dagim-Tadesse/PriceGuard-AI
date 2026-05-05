@@ -42,6 +42,7 @@ function actionFromTrend(trend: Trend): Action {
 }
 
 function normalizeRow(row: any): PriceRecord {
+  if (!row) return {} as PriceRecord;
   return {
     id: row.id,
     product: row.product,
@@ -131,7 +132,7 @@ export const updatePrice = async (
     headers: { Prefer: "return=representation" },
     body: JSON.stringify(patch),
   });
-  return normalizeRow(record[0]);
+  return record && record.length > 0 ? normalizeRow(record[0]) : ({} as PriceRecord);
 };
 
 export const confirmPrice = async (id: number, confirmations: number) => {
@@ -140,5 +141,5 @@ export const confirmPrice = async (id: number, confirmations: number) => {
     headers: { Prefer: "return=representation" },
     body: JSON.stringify({ confirmations }),
   });
-  return normalizeRow(record[0]);
+  return record && record.length > 0 ? normalizeRow(record[0]) : ({} as PriceRecord);
 };
