@@ -78,47 +78,47 @@ async function supabaseAuthSignin(email: string, password: string) {
 }
 
 async function insertUserProfile(name: string, email: string, role: string) {
-  const payload = { name, email, role };
+  requireConfig();
+  const payload = { name, email, role: role.toLowerCase() };
 
-  const base = import.meta.env.VITE_API_BASE_URL ?? import.meta.env.VITE_BACKEND_BASE_URL ?? "/api";
-  const url = `${base}/users/`;
-
-  let res: Response;
-  try {
-    res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
-  } catch (err) {
-    // Network-level failure (server down, CORS preflight blocked, DNS, etc.)
-    console.error("Failed to POST profile to backend", { url, payload, err });
-    throw new Error(
-      `Failed to reach backend at ${url}. Is the backend running? Check CORS and network. (${(err as Error)?.message})`
-    );
-  }
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/pricebudget_users`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY!,
+      Authorization: `Bearer ${SUPABASE_KEY!}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify(payload),
+  });
 
   if (!res.ok) {
     const message = await readResponseError(res);
-    throw new Error(`Backend responded with ${res.status}: ${message}`);
+    throw new Error(`Failed to create profile in Supabase: ${message}`);
   }
 
   const data = await res.json().catch(() => null);
-  if (!data) {
-    throw new Error(`Backend returned an empty response from ${url}`);
+  if (!data || !data.length) {
+    throw new Error(`Supabase returned an empty response after profile creation.`);
   }
 
-  return data as UserProfile;
+  return data[0] as UserProfile;
 }
 
 async function fetchUserProfile(email: string): Promise<UserProfile> {
-  const users = await apiFetch<UserProfile[]>("/users/");
+  requireConfig();
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/pricebudget_users?email=eq.${encodeURIComponent(email)}&select=*`, {
+    headers: {
+      apikey: SUPABASE_KEY!,
+      Authorization: `Bearer ${SUPABASE_KEY!}`,
+    }
+  });
+  
+  const users = await res.json().catch(() => null);
   if (!Array.isArray(users)) {
-    throw new Error("API did not return a valid user list. If deployed, ensure VITE_API_BASE_URL points to your hosted Django backend.");
+    throw new Error("Supabase did not return a valid user list.");
   }
-  const profile = users.find((user) => user.email.toLowerCase() === email.toLowerCase());
+  const profile = users[0];
   if (!profile) throw new Error("No profile found for this account. Please sign up first.");
   return profile;
 }
