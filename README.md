@@ -12,7 +12,7 @@ The project is organized around a clean split between frontend, backend, AI logi
 - `backend/` - Django REST API and server-side business logic.
 - `Ai/` - lightweight prediction and trend logic.
 - `database/` - schema, RLS, and seed data.
-- `docs/` - API, architecture, demo, and setup notes.
+- `docs/` - API, architecture, and setup notes.
 
 ## What each part does
 
@@ -104,7 +104,7 @@ If CI fails due to CORS or host issues, see `docs/cors.md` for local development
 
 ## What makes this different
 
-- Demo-first reliability: one-command setup, reset/seed scripts, and smoke-tested API flow.
+- Seamless setup: one-command setup, seed scripts, and smoke-tested API flow.
 - Explainable recommendations: each prediction includes trend, confidence, action, and plain-English reason.
 - Practical UX for decisions: dashboard summary, filters, comparison by location, watchlist, and alerts.
 - Fast local reproducibility: pinned dependencies and CI checks for frontend + backend.
@@ -124,7 +124,7 @@ At a high level:
    - `confidence`
    - `reason` (plain-English explanation)
 
-This is optimized for interpretability and demo reliability rather than heavy model complexity.
+This is optimized for interpretability and system reliability rather than heavy model complexity.
 
 ## Troubleshooting
 
@@ -140,8 +140,7 @@ This is optimized for interpretability and demo reliability rather than heavy mo
   - Review `docs/cors.md` and add required origins/hosts.
 
 - Empty dashboard data
-  - Reset and reseed demo data:
-  - `\.\scripts\reset-demo.ps1`
+  - Reseed data using setup scripts or manual entry.
 
 - Prediction unavailable for a product
   - Add more price entries for that product; sparse history returns a safe fallback.
@@ -150,7 +149,6 @@ This is optimized for interpretability and demo reliability rather than heavy mo
   - Run unit tests: `\.venv\Scripts\python.exe backend\priceguard\manage.py test`
   - Run smoke test: `\.venv\Scripts\python.exe scripts\smoke_test.py`
 
-## Presenter resources
+## Project resources
 
-- One-page demo guide: `docs/demo-script.md`
 - Architecture overview: `docs/architecture.md`
